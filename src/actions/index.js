@@ -5,12 +5,23 @@ const ROOT_URL = `http://api.openweathermap.org/data/2.5/forecast?appid=${API_KE
 
 export const FETCH_WEATHER = 'FETCH_WEATHER';
 
-export function fetchWeather(city) {
-    const url = `${ROOT_URL}&q=${city},us`;
-    const request = axios.get(url);
+export function fetchWeather({ term }) {
+  return async (dispatch) => {
+    const { data } = await axios.get(`${ROOT_URL}&q=${term},us`);
+    const { name, coord } = data.city;
+    const temps = data.list.map((weather) => weather.main.temp);
+    const pressures = data.list.map((weather) => weather.main.pressure);
+    const humidities = data.list.map((weather) => weather.main.humidity);
 
-    return {
-        type: FETCH_WEATHER,
-        payload: request
-    };
+    dispatch({
+      type: FETCH_WEATHER,
+      payload: {
+        name,
+        ...coord,
+        temps,
+        pressures,
+        humidities
+      }
+    });
+  };
 }
